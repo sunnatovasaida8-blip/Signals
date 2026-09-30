@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Signals - BE127</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0b0e14;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* HEADER & PROMO BANNER */
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+
+        .promo-banner {
+            background: linear-gradient(135deg, rgba(255, 183, 3, 0.15), rgba(255, 183, 3, 0.05));
+            border: 1px solid #ffb703;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .promo-banner span {
+            color: #ffb703;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* INPUT FIELD */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #2a2e3d;
+            background: #151a24;
+            color: #fff;
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #00ff88;
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+        }
+
+        /* NAV TABS FOR GAMES */
+        .game-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 12px;
+            background: #151a24;
+            border: 1px solid #2a2e3d;
+            border-radius: 8px;
+            color: #a0a5b5;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #00ff88;
+            color: #0b0e14;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* GAME DISPLAY BOX */
+        .game-card {
+            background: #151a24;
+            border: 1px solid #2a2e3d;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        /* GAME DISPLAY AREAS */
+        .display-area {
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0b0e14;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Apple Grid */
+        .apple-grid {
+            display: flex;
+            gap: 8px;
+        }
+        .apple-spot {
+            width: 45px;
+            height: 45px;
+            background: #151a24;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: 1px solid #2a2e3d;
+        }
+        .apple-spot.active {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        /* Mines Grid */
+        .mines-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 220px;
+        }
+        .mine-spot {
+            height: 45px;
+            background: #151a24;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border: 1px solid #2a2e3d;
+        }
+        .mine-spot.star {
+            border-color: #ffb703;
+            background: rgba(255, 183, 3, 0.15);
+        }
+
+        /* Aviator/Crash Multiplier */
+        .crash-value {
+            font-size: 38px;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        /* MAIN BUTTON */
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #00ff88, #00b894);
+            color: #0b0e14;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+            transition: 0.2s;
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>⚡ PRO SIGNAL BOT ⚡</h1>
+    </div>
+
+    <!-- Promo Banner -->
+    <div class="promo-banner">
+        ⚠️ Signallar faqat Linebet/Melbet'da <span>BE127</span> promokodi orqali roʻyxatdan oʻtib, depozit qilgan ID raqamlarda aniq ishlaydi!
+    </div>
+
+    <!-- ID Input -->
+    <div class="input-group">
+        <input type="number" id="userId" placeholder="10-xonali ID raqamingizni kiriting">
+    </div>
+
+    <!-- Game Tabs -->
+    <div class="game-tabs">
+        <div class="tab-btn active" onclick="switchGame('apple')">🍎 Apple</div>
+        <div class="tab-btn" onclick="switchGame('mines')">💣 Mines</div>
+        <div class="tab-btn" onclick="switchGame('crash')">🚀 Aviator</div>
+    </div>
+
+    <!-- Game Card -->
+    <div class="game-card">
+        <div class="game-title" id="gameTitle">Apple of Fortune</div>
+        
+        <!-- Game Display -->
+        <div class="display-area" id="displayArea">
+            <span style="color: #6c757d;">ID kiriting va "SIGNAL OLISH" tugmasini bosing</span>
+        </div>
+
+        <button class="btn-action" onclick="generateSignal()">SIGNAL OLISH 🚀</button>
+    </div>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let currentGame = 'apple';
+
+    function switchGame(game) {
+        currentGame = game;
+        
+        // Update Tabs UI
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Update Title & Display Reset
+        const title = document.getElementById('gameTitle');
+        const display = document.getElementById('displayArea');
+
+        if (game === 'apple') {
+            title.innerText = 'Apple of Fortune';
+            display.innerHTML = '<span style="color: #6c757d;">Apple signali kutilmoqda...</span>';
+        } else if (game === 'mines') {
+            title.innerText = 'Mines (Minalar)';
+            display.innerHTML = '<span style="color: #6c757d;">Mines signali kutilmoqda...</span>';
+        } else if (game === 'crash') {
+            title.innerText = 'Aviator / Crash';
+            display.innerHTML = '<span style="color: #6c757d;">Koeffitsiyent kutilmoqda...</span>';
+        }
+    }
+
+    function generateSignal() {
+        const userId = document.getElementById('userId').value;
+
+        if (userId.length !== 10) {
+            alert("Iltimos, 10-xonali ID raqamingizni to'g'ri kiriting!");
+            return;
+        }
+
+        const display = document.getElementById('displayArea');
+
+        if (currentGame === 'apple') {
+            // Apple of Fortune Logic
+            const safeSpot = Math.floor(Math.random() * 5);
+            let html = '<div class="apple-grid">';
+            for (let i = 0; i < 5; i++) {
+                if (i === safeSpot) {
+                    html += '<div class="apple-spot active">🍎</div>';
+                } else {
+                    html += '<div class="apple-spot">⬛</div>';
+                }
+            }
+            html += '</div>';
+            display.innerHTML = html;
+
+        } else if (currentGame === 'mines') {
+            // Mines Logic (12 grid, 3 star locations)
+            let stars = [];
+            while (stars.length < 3) {
+                let r = Math.floor(Math.random() * 12);
+                if (!stars.includes(r)) stars.push(r);
+            }
+
+            let html = '<div class="mines-grid">';
+            for (let i = 0; i < 12; i++) {
+                if (stars.includes(i)) {
+                    html += '<div class="mine-spot star">⭐</div>';
+                } else {
+                    html += '<div class="mine-spot">⬛</div>';
+                }
+            }
+            html += '</div>';
+            display.innerHTML = html;
+
+        } else if (currentGame === 'crash') {
+            // Crash/Aviator Logic
+            const coef = (Math.random() * (4.50 - 1.20) + 1.20).toFixed(2);
+            display.innerHTML = `<div class="crash-value">x${coef}</div><span style="font-size:12px; color:#aaa; margin-top:5px;">Chiqish koeffitsiyenti</span>`;
+        }
+    }
+</script>
+</body>
+</html>
+
