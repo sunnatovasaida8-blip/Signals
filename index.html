@@ -3,362 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>MAX STAVKA VIP - BE127</title>
+  <title>4vs4 Shooter Arena</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: #0b0e14; color: #ffffff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden; justify-content: center; }
     
-    /* USER PROFILE HEADER */
-    .user-card { width: 100%; max-width: 420px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; color: #fff; }
-    .user-details { display: flex; flex-direction: column; }
-    .user-name { font-size: 14px; font-weight: bold; color: #f8fafc; }
-    .user-status { font-size: 11px; color: #10b981; font-weight: 600; }
+    .header { width: 100%; max-width: 400px; padding: 10px; display: flex; justify-content: space-between; background: #1e293b; font-size: 14px; font-weight: bold; }
     
-    /* PROMO BANNER & COPY */
-    .promo-box { background: rgba(59, 130, 246, 0.1); border: 1px dashed #3b82f6; border-radius: 8px; padding: 4px 8px; display: flex; align-items: center; gap: 6px; }
-    .promo-code { font-weight: bold; color: #60a5fa; font-size: 13px; }
-    .copy-btn { background: #2563eb; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; }
+    canvas { background: #1e293b; border: 2px solid #334155; border-radius: 10px; touch-action: none; }
 
-    /* LIVE WINS TICKER */
-    .live-ticker { width: 100%; max-width: 420px; background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 6px 12px; font-size: 11px; color: #fbbf24; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+    .controls { width: 100%; max-width: 400px; padding: 10px; display: flex; gap: 10px; flex-direction: column; }
+    .weapons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; }
+    .w-btn { background: #334155; border: 1px solid #475569; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+    .w-btn.active { background: #3b82f6; border-color: #60a5fa; }
 
-    /* MENU GRID */
-    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 420px; margin-bottom: 15px; }
-    .menu-card { background: #1f2937; border: 1px solid #374151; border-radius: 12px; padding: 14px 10px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: bold; }
-    .menu-card:active { transform: scale(0.96); background: #374151; }
-    .menu-card.full-width { grid-column: span 2; background: linear-gradient(135deg, #1d4ed8, #2563eb); border-color: #60a5fa; }
+    .fire-btn { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: white; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); text-align: center; }
+    .fire-btn:active { transform: scale(0.96); }
 
-    /* SCREENS */
-    .game-screen { width: 100%; max-width: 420px; background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 16px; display: none; flex-direction: column; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-    .game-screen.active { display: flex; }
-
-    .back-btn { align-self: flex-start; background: #374151; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; cursor: pointer; }
-
-    /* SIGNAL TIMER & POWER */
-    .signal-status { width: 100%; display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 10px; margin-bottom: 5px; }
-    .signal-power { color: #10b981; font-weight: bold; }
-
-    /* MINES */
-    .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin: 12px 0; }
-    .grid-cell { aspect-ratio: 1; background: #1f2937; border-radius: 8px; border: 1px solid #374151; display: flex; justify-content: center; align-items: center; font-size: 20px; }
-    .grid-cell.star { background: #065f46; border-color: #10b981; box-shadow: 0 0 8px #10b981; }
-
-    /* SWAMP LAND */
-    .swamp-grid { display: flex; flex-direction: column; gap: 6px; width: 100%; margin: 12px 0; }
-    .swamp-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .swamp-cell { height: 38px; background: #1f2937; border-radius: 6px; border: 1px solid #374151; display: flex; justify-content: center; align-items: center; font-size: 18px; }
-    .swamp-cell.safe { background: #0284c7; border-color: #38bdf8; box-shadow: 0 0 8px #38bdf8; }
-
-    /* APPLE OF FORTUNE */
-    .apple-grid { display: flex; flex-direction: column; gap: 4px; width: 100%; margin: 10px 0; }
-    .apple-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 2px; border-radius: 6px; background: #1f2937; }
-    .apple-cell { height: 28px; background: #374151; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 13px; }
-    .apple-cell.safe { background: #15803d; color: #fff; }
-
-    /* AVIATOR */
-    .aviator-box { width: 100%; height: 150px; background: #000; border-radius: 12px; border: 1px solid #e11d48; display: flex; justify-content: center; align-items: center; font-size: 34px; font-weight: bold; color: #f43f5e; margin: 12px 0; }
-
-    /* FOOTBALL STATS */
-    .foot-box { width: 100%; background: #1f2937; border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 13px; line-height: 1.6; }
-    .foot-item { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding: 5px 0; }
-
-    /* DEPOSIT CALCULATOR */
-    .calc-box { width: 100%; background: #1f2937; border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 12px; }
-    .calc-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #374151; background: #0b0e14; color: #fff; margin: 8px 0; font-size: 14px; text-align: center; }
-
-    /* GENERAL BUTTON */
-    .action-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-    .action-btn:active { transform: scale(0.98); }
-    .footer-promo { margin-top: auto; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+    .status-overlay { position: absolute; background: rgba(0,0,0,0.85); width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; font-size: 20px; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <!-- USER HEADER -->
-  <div class="user-card">
-    <div class="user-info">
-      <div class="user-avatar" id="uAvatar">U</div>
-      <div class="user-details">
-        <div class="user-name" id="uName">Foydalanuvchi</div>
-        <div class="user-status">● VIP Status (Faol)</div>
-      </div>
+  <div id="overlay" class="status-overlay" style="display:none;">
+    <div id="statusText" style="margin-bottom:15px;">1-RAUND</div>
+    <button onclick="nextRound()" style="padding:10px 20px; background:#10b981; border:none; color:#fff; border-radius:8px; font-weight:bold;">DAVOM ETISH 🚀</button>
+  </div>
+
+  <div class="header">
+    <div style="color:#60a5fa;">SIZ (KOK): <span id="blueScore">0</span></div>
+    <div style="color:#f87171;">ROUND: <span id="roundNum">1</span>/3</div>
+    <div style="color:#f87171;">DUSHMAN (QIZIL): <span id="redScore">0</span></div>
+  </div>
+
+  <canvas id="gameCanvas" width="360" height="360"></canvas>
+
+  <div class="controls">
+    <div class="weapons">
+      <button class="w-btn active" onclick="setWeapon('AK47', this)">AK-47</button>
+      <button class="w-btn" onclick="setWeapon('M416', this)">M416</button>
+      <button class="w-btn" onclick="setWeapon('AWM', this)">AWM</button>
+      <button class="w-btn" onclick="setWeapon('UMP45', this)">UMP-45</button>
+      <button class="w-btn" onclick="setWeapon('S12K', this)">S12K</button>
     </div>
-    <div class="promo-box">
-      <span class="promo-code">BE127</span>
-      <button class="copy-btn" onclick="copyPromo()">COPY</button>
-    </div>
-  </div>
-
-  <!-- LIVE TICKER -->
-  <div class="live-ticker">
-    <span>🔥 LIVE YUTUQ:</span> <span id="tickerText">User_8273 Mines'da 180 000 so'm yutib oldi!</span>
-  </div>
-
-  <!-- MAIN MENU -->
-  <div id="main-menu" class="menu-grid">
-    <div class="menu-card" onclick="openGame('mines')">💣 Mines (5x5)</div>
-    <div class="menu-card" onclick="openGame('swamp')">🐸 Swamp Land</div>
-    <div class="menu-card" onclick="openGame('apple')">🍎 Apple (27.98x)</div>
-    <div class="menu-card" onclick="openGame('aviator')">🚀 Aviator</div>
-    <div class="menu-card full-width" onclick="openGame('football')">⚽️ Futbol Taxmin AI</div>
-    <div class="menu-card full-width" style="background:#374151;" onclick="openGame('calc')">📊 Depozit Strategiya Kalkulyatori</div>
-  </div>
-
-  <!-- MINES -->
-  <div id="screen-mines" class="game-screen">
-    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
-    <h3>Mines (5x5)</h3>
-    <div class="mines-grid" id="minesGrid"></div>
-    <button class="action-btn" onclick="generateMines()">SIGNAL OL (5 STAR)</button>
-    <div class="signal-status">
-      <span>Kuchi: <b class="signal-power" id="minesPower">98%</b></span>
-      <span>Vaqti: <b id="minesTimer">00:30</b></span>
-    </div>
-  </div>
-
-  <!-- SWAMP LAND -->
-  <div id="screen-swamp" class="game-screen">
-    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
-    <h3>Swamp Land (Qurbaqa)</h3>
-    <div class="swamp-grid" id="swampGrid"></div>
-    <button class="action-btn" onclick="generateSwamp()">SIGNAL OL</button>
-    <div class="signal-status">
-      <span>Kuchi: <b class="signal-power" id="swampPower">96%</b></span>
-      <span>Vaqti: <b id="swampTimer">00:30</b></span>
-    </div>
-  </div>
-
-  <!-- APPLE OF FORTUNE -->
-  <div id="screen-apple" class="game-screen">
-    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
-    <h3>Apple of Fortune (Max 27.98x)</h3>
-    <div class="apple-grid" id="appleGrid"></div>
-    <button class="action-btn" onclick="generateApple()">SIGNAL OL</button>
-    <div class="signal-status">
-      <span>Kuchi: <b class="signal-power" id="applePower">97%</b></span>
-      <span>Vaqti: <b id="appleTimer">00:30</b></span>
-    </div>
-  </div>
-
-  <!-- AVIATOR -->
-  <div id="screen-aviator" class="game-screen">
-    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
-    <h3>Aviator Predictor</h3>
-    <div class="aviator-box" id="aviatorText">1.00x</div>
-    <button class="action-btn" onclick="generateAviator()">SIGNAL OL</button>
-    <div class="signal-status">
-      <span>Kuchi: <b class="signal-power" id="aviatorPower">95%</b></span>
-      <span>Vaqti: <b id="aviatorTimer">00:30</b></span>
-    </div>
-  </div>
-
-  <!-- FOOTBALL -->
-  <div id="screen-football" class="game-screen">
-    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
-    <h3>Futbol O'yin Tahlili</h3>
-    <div class="foot-box" id="footBox">
-      <div style="text-align:center; color:#94a3b8;">Tahlil olish uchun tugmani bosing</div>
-    </div>
-    <button class="action-btn" onclick="generateFootball()">TAHLIL QILISH</button>
-  </div>
-
-  <!-- CALCULATOR -->
-  <div id="screen-calc" class="game-screen">
-    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
-    <h3>Depozit Kalkulyatori</h3>
-    <div class="calc-box">
-      <label>Balansingizni kiriting (sum):</label>
-      <input type="number" id="depInput" class="calc-input" value="45000" oninput="calculateDep()">
-      <div id="calcRes">
-        <div class="foot-item"><span>Boshlang'ich stavka (1%):</span> <b>450 sum</b></div>
-        <div class="foot-item"><span>Mines uchun tavsiya:</span> <b>500 sum (1-qadam)</b></div>
-        <div class="foot-item"><span>Apple uchun tavsiya:</span> <b>500 sum</b></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-promo">
-    Promokod: <b>BE127</b> | Min. Depozit: 45 000 sum
+    <button class="fire-btn" id="fireBtn">OTISH 💥</button>
   </div>
 
   <script>
-    // TELEGRAM USER DATA
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.expand();
-      if (tg.initDataUnsafe?.user) {
-        const u = tg.initDataUnsafe.user;
-        document.getElementById('uName').innerText = u.first_name + (u.last_name ? " " + u.last_name : "");
-        document.getElementById('uAvatar').innerText = u.first_name.charAt(0).toUpperCase();
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentRound = 1;
+    let blueScore = 0;
+    let redScore = 0;
+    let isGameOver = false;
+
+    // QUROLLAR
+    const WEAPONS = {
+      'AK47': { damage: 35, rate: 200, speed: 8 },
+      'M416': { damage: 25, rate: 120, speed: 10 },
+      'AWM': { damage: 100, rate: 800, speed: 14 },
+      'UMP45': { damage: 20, rate: 90, speed: 9 },
+      'S12K': { damage: 60, rate: 400, speed: 7 }
+    };
+    let currentWeapon = WEAPONS['AK47'];
+
+    let players = [];
+    let bullets = [];
+
+    function initRound() {
+      bullets = [];
+      players = [];
+      
+      // KOK JAMOA (Siz + 3 bot)
+      players.push({ id: 0, x: 50, y: 180, team: 'blue', hp: 100, isUser: true });
+      for(let i=1; i<=3; i++) {
+        players.push({ id: i, x: 30, y: 50 + i*80, team: 'blue', hp: 100, isUser: false });
       }
-    }
 
-    function copyPromo() {
-      navigator.clipboard.writeText('BE127');
-      alert("Promokod BE127 nusxalandi!");
-    }
-
-    // LIVE TICKER LOOP
-    const wins = [
-      "User_9921 Aviator'da 3.45x ushladi!",
-      "User_1029 Mines'da 240 000 so'm yutdi!",
-      "User_5512 Apple'da 27.98x gacha yetdi! 🔥",
-      "User_8831 Swamp Land'da 120 000 so'm oldi!"
-    ];
-    let winIndex = 0;
-    setInterval(() => {
-      winIndex = (winIndex + 1) % wins.length;
-      document.getElementById('tickerText').innerText = wins[winIndex];
-    }, 4000);
-
-    // NAVIGATION
-    function goMenu() {
-      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('main-menu').style.display = 'grid';
-    }
-
-    function openGame(game) {
-      document.getElementById('main-menu').style.display = 'none';
-      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(`screen-${game}`).classList.add('active');
-    }
-
-    // TIMERS
-    function startTimer(timerId, powerId) {
-      let sec = 30;
-      document.getElementById(powerId).innerText = (Math.floor(Math.random() * 5) + 95) + "%";
-      const interval = setInterval(() => {
-        sec--;
-        document.getElementById(timerId).innerText = `00:${sec < 10 ? '0' + sec : sec}`;
-        if(sec <= 0) clearInterval(interval);
-      }, 1000);
-    }
-
-    // MINES
-    const minesGrid = document.getElementById('minesGrid');
-    for(let i=0; i<25; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'grid-cell';
-      minesGrid.appendChild(cell);
-    }
-    function generateMines() {
-      const cells = minesGrid.children;
-      for(let c of cells) { c.className = 'grid-cell'; c.innerHTML = ''; }
-      let safe = [];
-      while(safe.length < 5) {
-        let r = Math.floor(Math.random() * 25);
-        if(!safe.includes(r)) safe.push(r);
+      // QIZIL JAMOA (4 bot)
+      for(let i=0; i<4; i++) {
+        players.push({ id: i+4, x: 330, y: 50 + i*80, team: 'red', hp: 100, isUser: false });
       }
-      safe.forEach(idx => {
-        cells[idx].classList.add('star');
-        cells[idx].innerHTML = '⭐';
+
+      document.getElementById('overlay').style.display = 'none';
+      isGameOver = false;
+    }
+
+    // YURISH (Touch dragging)
+    let isDragging = false;
+    canvas.addEventListener('touchstart', (e) => isDragging = true);
+    canvas.addEventListener('touchend', () => isDragging = false);
+    canvas.addEventListener('touchmove', (e) => {
+      if(!isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      const user = players.find(p => p.isUser && p.hp > 0);
+      if(user) {
+        user.x = touch.clientX - rect.left;
+        user.y = touch.clientY - rect.top;
+      }
+    });
+
+    // OTISH
+    document.getElementById('fireBtn').addEventListener('click', () => {
+      const user = players.find(p => p.isUser && p.hp > 0);
+      if(user) shoot(user, currentWeapon);
+    });
+
+    function shoot(p, weapon) {
+      // Eng yaqin dushmanni topish
+      let enemies = players.filter(e => e.team !== p.team && e.hp > 0);
+      if(enemies.length === 0) return;
+
+      let target = enemies[0];
+      let minDist = 9999;
+      enemies.forEach(e => {
+        let d = Math.hypot(e.x - p.x, e.y - p.y);
+        if(d < minDist) { minDist = d; target = e; }
       });
-      startTimer('minesTimer', 'minesPower');
+
+      let angle = Math.atan2(target.y - p.y, target.x - p.x);
+      bullets.push({
+        x: p.x, y: p.y,
+        vx: Math.cos(angle) * weapon.speed,
+        vy: Math.sin(angle) * weapon.speed,
+        damage: weapon.damage,
+        team: p.team
+      });
     }
 
-    // SWAMP LAND
-    const swampGrid = document.getElementById('swampGrid');
-    for(let r=0; r<4; r++) {
-      const row = document.createElement('div');
-      row.className = 'swamp-row';
-      for(let c=0; c<4; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'swamp-cell';
-        cell.id = `swamp-${r}-${c}`;
-        row.appendChild(cell);
-      }
-      swampGrid.appendChild(row);
+    function setWeapon(name, btn) {
+      currentWeapon = WEAPONS[name];
+      document.querySelectorAll('.w-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     }
-    function generateSwamp() {
-      for(let r=0; r<4; r++) {
-        let safeCol = Math.floor(Math.random() * 4);
-        for(let c=0; c<4; c++) {
-          const el = document.getElementById(`swamp-${r}-${c}`);
-          el.className = 'swamp-cell';
-          el.innerHTML = '';
-          if(c === safeCol) {
-            el.classList.add('safe');
-            el.innerHTML = '🪷';
+
+    // BOT AI (Avto-harakat va otish)
+    setInterval(() => {
+      if(isGameOver) return;
+      players.forEach(p => {
+        if(!p.isUser && p.hp > 0) {
+          // Kichik tasodifiy harakat
+          p.x += (Math.random() - 0.5) * 10;
+          p.y += (Math.random() - 0.5) * 10;
+
+          // Bot otishi
+          if(Math.random() < 0.4) {
+            shoot(p, WEAPONS['M416']);
           }
         }
-      }
-      startTimer('swampTimer', 'swampPower');
-    }
+      });
+    }, 500);
 
-    // APPLE
-    const appleGrid = document.getElementById('appleGrid');
-    for(let r=9; r>=0; r--) {
-      const row = document.createElement('div');
-      row.className = 'apple-row';
-      for(let c=0; c<5; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'apple-cell';
-        cell.id = `apple-${r}-${c}`;
-        row.appendChild(cell);
-      }
-      appleGrid.appendChild(row);
-    }
-    function generateApple() {
-      for(let r=0; r<10; r++) {
-        let safeCol = Math.floor(Math.random() * 5);
-        for(let c=0; c<5; c++) {
-          const el = document.getElementById(`apple-${r}-${c}`);
-          el.className = 'apple-cell';
-          el.innerHTML = '';
-          if(c === safeCol) {
-            el.classList.add('safe');
-            el.innerHTML = '🍎';
+    // GAME LOOP
+    function update() {
+      if(isGameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // O'QLARNI HISOBLASH
+      bullets.forEach((b, bIdx) => {
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Chizish
+        ctx.fillStyle = b.team === 'blue' ? '#60a5fa' : '#f87171';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 3, 0, Math.PI*2);
+        ctx.fill();
+
+        // Tegishni tekshirish
+        players.forEach(p => {
+          if(p.hp > 0 && p.team !== b.team) {
+            let dist = Math.hypot(p.x - b.x, p.y - b.y);
+            if(dist < 12) {
+              p.hp -= b.damage;
+              bullets.splice(bIdx, 1);
+            }
           }
+        });
+      });
+
+      // O'YINCHILARNI CHIZISH
+      let blueAlive = 0;
+      let redAlive = 0;
+
+      players.forEach(p => {
+        if(p.hp > 0) {
+          if(p.team === 'blue') blueAlive++;
+          else redAlive++;
+
+          // O'yinchi tanasi
+          ctx.fillStyle = p.team === 'blue' ? '#2563eb' : '#dc2626';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 10, 0, Math.PI*2);
+          ctx.fill();
+
+          if(p.isUser) {
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+
+          // HP BAR
+          ctx.fillStyle = '#000';
+          ctx.fillRect(p.x - 12, p.y - 18, 24, 4);
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(p.x - 12, p.y - 18, (p.hp/100)*24, 4);
         }
+      });
+
+      // RAUND TUGASHINI TEKSHIRISH
+      if(blueAlive === 0 || redAlive === 0) {
+        isGameOver = true;
+        if(blueAlive > 0) blueScore++;
+        else redScore++;
+
+        document.getElementById('blueScore').innerText = blueScore;
+        document.getElementById('redScore').innerText = redScore;
+
+        const overlay = document.getElementById('overlay');
+        const statusText = document.getElementById('statusText');
+
+        if(currentRound >= 3 || blueScore === 2 || redScore === 2) {
+          statusText.innerText = blueScore > redScore ? "O'YINDA YUTDINGIZ! 🎉" : "YUTQAZDINGIZ! ❌";
+        } else {
+          statusText.innerText = `${currentRound}-RAUND TUGADI!`;
+        }
+        overlay.style.display = 'flex';
       }
-      startTimer('appleTimer', 'applePower');
+
+      requestAnimationFrame(update);
     }
 
-    // AVIATOR
-    function generateAviator() {
-      const el = document.getElementById('aviatorText');
-      el.innerText = "...";
-      setTimeout(() => {
-        let val = (Math.random() * 4 + 1.15).toFixed(2);
-        el.innerText = val + "x";
-        startTimer('aviatorTimer', 'aviatorPower');
-      }, 500);
+    function nextRound() {
+      if(currentRound >= 3 || blueScore === 2 || redScore === 2) {
+        currentRound = 1;
+        blueScore = 0;
+        redScore = 0;
+        document.getElementById('blueScore').innerText = 0;
+        document.getElementById('redScore').innerText = 0;
+      } else {
+        currentRound++;
+      }
+      document.getElementById('roundNum').innerText = currentRound;
+      initRound();
+      update();
     }
 
-    // FOOTBALL
-    function generateFootball() {
-      const box = document.getElementById('footBox');
-      box.innerHTML = "<div style='text-align:center'>Analiz qilinmoqda...</div>";
-      setTimeout(() => {
-        let g1 = Math.floor(Math.random() * 35) + 40;
-        let g2 = 100 - g1 - 10;
-        let total = (Math.random() * 1.5 + 1.8).toFixed(1);
-        let ugG1 = Math.floor(Math.random() * 30) + 45;
-        let ugG2 = 100 - ugG1;
-
-        box.innerHTML = `
-          <div class="foot-item"><span>G'alaba G'1:</span> <b>${g1}%</b></div>
-          <div class="foot-item"><span>G'alaba G'2:</span> <b>${g2}%</b></div>
-          <div class="foot-item"><span>Total (Gol):</span> <b>${total} over</b></div>
-          <div class="foot-item"><span>Burchak (G'1):</span> <b>${ugG1}%</b></div>
-          <div class="foot-item"><span>Burchak (G'2):</span> <b>${ugG2}%</b></div>
-        `;
-      }, 600);
-    }
-
-    // CALCULATOR
-    function calculateDep() {
-      const val = document.getElementById('depInput').value || 0;
-      const st = Math.floor(val * 0.01);
-      document.getElementById('calcRes').innerHTML = `
-        <div class="foot-item"><span>Boshlang'ich stavka (1%):</span> <b>${st} sum</b></div>
-        <div class="foot-item"><span>Mines uchun tavsiya:</span> <b>${st > 500 ? st : 500} sum (1-qadam)</b></div>
-        <div class="foot-item"><span>Apple uchun tavsiya:</span> <b>${st > 500 ? st : 500} sum</b></div>
-      `;
-    }
+    initRound();
+    update();
   </script>
 </body>
 </html>
