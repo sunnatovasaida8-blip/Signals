@@ -4,19 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>MAX STAVKA - BE127 VIP SIGNALS</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     
     body {
-      background: #06160b linear-gradient(180deg, #030d07 0%, #0d2b17 50%, #041208 100%);
+      background: #041208 linear-gradient(180deg, #020a04 0%, #0a2613 50%, #030e06 100%);
       color: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
       padding: 10px;
-      overflow-x: hidden;
     }
 
     /* HEADER & ID SECTION */
@@ -28,24 +26,27 @@
       padding: 10px 14px;
       margin-bottom: 10px;
       display: flex; flex-direction: column; gap: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
     .top-bar { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 13px; }
-    .promo-badge { background: #34c759; color: #000; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+    
+    .promo-badge {
+      background: #34c759; color: #000; font-weight: 800; padding: 4px 10px; border-radius: 6px;
+      cursor: pointer; transition: 0.2s; user-select: none;
+    }
+    .promo-badge:active { transform: scale(0.95); background: #2cb04d; }
 
     .id-box { display: flex; gap: 6px; width: 100%; }
     .id-input {
       flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(52, 199, 89, 0.4);
       border-radius: 8px; color: #fff; padding: 8px 12px; font-size: 13px; outline: none; text-align: center;
     }
-    .id-input::placeholder { color: #88a890; }
     .btn-connect {
       background: #34c759; color: #000; font-weight: bold; border: none;
       border-radius: 8px; padding: 0 14px; font-size: 12px; cursor: pointer;
     }
 
-    .status-text { font-size: 11px; color: #34c759; text-align: center; display: none; }
+    .status-text { font-size: 11px; color: #34c759; text-align: center; display: none; font-weight: 600; }
 
     /* NAVIGATION TABS */
     .game-tabs { display: flex; gap: 6px; width: 100%; max-width: 420px; margin-bottom: 10px; }
@@ -55,15 +56,15 @@
     }
     .tab-btn.active { background: rgba(52, 199, 89, 0.2); border-color: #34c759; color: #fff; font-weight: bold; }
 
-    /* GAME BOARD - APPLE OF FORTUNE */
+    /* GAME CONTAINERS */
     .game-view { width: 100%; max-width: 420px; display: none; flex-direction: column; align-items: center; }
     .game-view.active { display: flex; }
 
+    /* APPLE OF FORTUNE BOARD */
     .board-container {
       width: 100%; display: flex; flex-direction: column; gap: 5px;
       background: radial-gradient(circle, rgba(18, 56, 31, 0.9) 0%, rgba(3, 15, 7, 0.95) 100%);
       padding: 10px 8px; border-radius: 16px; border: 1px solid rgba(52, 199, 89, 0.3);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
 
     .apple-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 6px; }
@@ -82,26 +83,44 @@
     .wooden-cell {
       aspect-ratio: 1; border-radius: 50%;
       background: radial-gradient(circle, #8b5a2b 0%, #4a2e11 80%, #2d1a08 100%);
-      border: 2px solid #a66d3b; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 3px 6px rgba(0,0,0,0.6);
-      display: flex; justify-content: center; align-items: center; font-size: 20px; transition: all 0.3s ease;
+      border: 2px solid #a66d3b; display: flex; justify-content: center; align-items: center; font-size: 20px;
     }
-
     .wooden-cell.apple {
-      background: radial-gradient(circle, #248a3d 0%, #0b3e17 100%); border-color: #34c759;
-      box-shadow: 0 0 12px #34c759;
+      background: radial-gradient(circle, #248a3d 0%, #0b3e17 100%); border-color: #34c759; box-shadow: 0 0 12px #34c759;
     }
     .wooden-cell.eaten {
-      background: radial-gradient(circle, #8b0000 0%, #4a0000 100%); border-color: #ff3b30;
-      box-shadow: 0 0 10px #ff3b30; opacity: 0.7;
+      background: radial-gradient(circle, #8b0000 0%, #4a0000 100%); border-color: #ff3b30; opacity: 0.7;
     }
+
+    /* SWAMP LAND BOARD (4x5) */
+    .swamp-board {
+      display: grid; grid-template-rows: repeat(4, 1fr); gap: 8px; width: 100%;
+      background: #081d11; padding: 12px; border-radius: 16px; border: 1px solid #34c759;
+    }
+    .swamp-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .swamp-cell {
+      aspect-ratio: 1; background: #143320; border: 1px solid #225435; border-radius: 10px;
+      display: flex; justify-content: center; align-items: center; font-size: 22px;
+    }
+    .swamp-cell.safe { background: #1e5933; border-color: #34c759; box-shadow: 0 0 8px #34c759; }
+
+    /* MINES BOARD (5x5) */
+    .mines-board {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%;
+      background: #0a1820; padding: 12px; border-radius: 16px; border: 1px solid #007aff;
+    }
+    .mine-cell {
+      aspect-ratio: 1; background: #142836; border: 1px solid #20435c; border-radius: 10px;
+      display: flex; justify-content: center; align-items: center; font-size: 22px;
+    }
+    .mine-cell.star { background: #007aff; border-color: #5ac8fa; box-shadow: 0 0 10px #007aff; }
 
     /* CONTROLS */
     .controls { width: 100%; max-width: 420px; margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 
     .btn-main {
       width: 100%; padding: 14px; background: linear-gradient(135deg, #34c759, #1e7031);
-      border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 800;
-      box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4); cursor: pointer; letter-spacing: 0.5px;
+      border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 800; cursor: pointer;
     }
     .btn-main:active { transform: scale(0.98); }
 
@@ -110,109 +129,91 @@
       flex: 1; padding: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
       color: #fff; border-radius: 10px; font-weight: 700; cursor: pointer; text-align: center; font-size: 13px;
     }
-    .btn-sub:active { background: rgba(255,255,255,0.18); }
-
-    /* OTHER GAMES PLACEHOLDER */
-    .placeholder-card {
-      width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px; padding: 30px; text-align: center; margin-top: 10px;
-    }
-
-    .footer-leaves { margin-top: auto; font-size: 22px; opacity: 0.5; text-align: center; padding-top: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- HEADER & ID INPUT -->
+  <!-- HEADER & ID SECTION -->
   <div class="header-card">
     <div class="top-bar">
       <span>⚡️ MAX STAVKA SIGNALS</span>
-      <span class="promo-badge">PROMO: BE127</span>
+      <div class="promo-badge" onclick="copyPromo()">PROMO: BE127</div>
     </div>
     <div class="id-box">
-      <input type="number" id="userId" class="id-input" placeholder="1xBet / Linebet ID kiriting">
+      <input type="number" id="userId" class="id-input" placeholder="Linebet ID kiriting">
       <button class="btn-connect" onclick="connectID()">ULANISH ⚡️</button>
     </div>
-    <div id="statusText" class="status-text">✅ ID ulandi. Algoritm aniqligi: 98%</div>
+    <div id="statusText" class="status-text">✅ Account muvaffaqiyatli ulandi! Account aktiv.</div>
   </div>
 
-  <!-- GAME SELECTION TABS -->
+  <!-- NAVIGATION TABS -->
   <div class="game-tabs">
-    <div class="tab-btn active" onclick="switchGame('apple')">🍎 Apple</div>
-    <div class="tab-btn" onclick="switchGame('swamp')">🐸 Swamp Land</div>
-    <div class="tab-btn" onclick="switchGame('aviator')">✈️ Aviator</div>
+    <div class="tab-btn active" onclick="switchGame('apple', event)">🍎 Apple</div>
+    <div class="tab-btn" onclick="switchGame('swamp', event)">🐸 Swamp Land</div>
+    <div class="tab-btn" onclick="switchGame('mines', event)">💣 Mines</div>
   </div>
 
-  <!-- APPLE OF FORTUNE GAME -->
+  <!-- APPLE OF FORTUNE -->
   <div id="appleGame" class="game-view active">
     <div class="board-container" id="board"></div>
-
     <div class="controls">
-      <button class="btn-main" onclick="generateSignal()">🚀 START (SIGNAL OL)</button>
+      <button class="btn-main" onclick="generateAppleSignal()">🚀 START (SIGNAL OL)</button>
       <div class="nav-btns">
-        <button class="btn-sub" onclick="prevStep()">⬅️ OLDINGI QATOR</button>
-        <button class="btn-sub" onclick="nextStep()">KEYINGI QATOR ➡️</button>
+        <button class="btn-sub" onclick="prevAppleStep()">⬅️ OLDINGI QATOR</button>
+        <button class="btn-sub" onclick="nextAppleStep()">KEYINGI QATOR ➡️</button>
       </div>
     </div>
   </div>
 
-  <!-- SWAMP LAND GAME -->
+  <!-- SWAMP LAND -->
   <div id="swampGame" class="game-view">
-    <div class="placeholder-card">
-      <h2>🐸 SWAMP LAND</h2>
-      <p style="margin-top:10px; color:#aaa; font-size:14px;">Xavfsiz barglar tahlili va MAX 27X signali tayyorlanmoqda...</p>
-      <button class="btn-main" style="margin-top:20px;" onclick="alert('Swamp Land Signal olinmoqda!')">🚀 SWAMP SIGNAL OL</button>
+    <div class="swamp-board" id="swampBoard"></div>
+    <div class="controls">
+      <button class="btn-main" onclick="generateSwampSignal()">🚀 SWAMP SIGNAL OL</button>
     </div>
   </div>
 
-  <!-- AVIATOR GAME -->
-  <div id="aviatorGame" class="game-view">
-    <div class="placeholder-card">
-      <h2>✈️ AVIATOR CRASH</h2>
-      <p style="margin-top:10px; color:#aaa; font-size:14px;">Navbatdagi samolyot uchish kuchi (x2.50+)</p>
-      <h1 style="color:#34c759; margin-top:15px; font-size:36px;" id="aviatorValue">x1.00</h1>
-      <button class="btn-main" style="margin-top:20px;" onclick="getAviatorSignal()">🚀 AVIATOR SIGNAL OL</button>
+  <!-- MINES -->
+  <div id="minesGame" class="game-view">
+    <div class="mines-board" id="minesBoard"></div>
+    <div class="controls">
+      <button class="btn-main" style="background: linear-gradient(135deg, #007aff, #004080);" onclick="generateMinesSignal()">🚀 MINES SIGNAL OL</button>
     </div>
   </div>
-
-  <div class="footer-leaves">🌿 🌴 🪷 🌴 🌿</div>
 
   <script>
-    const coeffs = [
-      "x 349.68", "x 69.93", "x 27.97", "x 11.18", 
-      "x 6.71", "x 4.02", "x 2.41", "x 1.93", "x 1.54", "x 1.23"
-    ];
+    // Copy Promo Code
+    function copyPromo() {
+      navigator.clipboard.writeText("BE127");
+      alert("Promokod nusxalandi: BE127");
+    }
 
-    const board = document.getElementById('board');
-    let currentStep = 9; // starts from x1.23 (bottom row)
-    let safeCols = [];
-
+    // Connect ID
     function connectID() {
       const val = document.getElementById('userId').value;
-      if (val.length < 5) {
-        alert("Iltimos, haqiqiy ID raqamini kiriting!");
+      if (val.length < 4) {
+        alert("Iltimos, Linebet ID raqamingizni kiriting!");
         return;
       }
       document.getElementById('statusText').style.display = 'block';
     }
 
-    function switchGame(game) {
+    // Tab Switcher
+    function switchGame(game, e) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.game-view').forEach(g => g.classList.remove('active'));
 
-      if (game === 'apple') {
-        event.target.classList.add('active');
-        document.getElementById('appleGame').classList.add('active');
-      } else if (game === 'swamp') {
-        event.target.classList.add('active');
-        document.getElementById('swampGame').classList.add('active');
-      } else if (game === 'aviator') {
-        event.target.classList.add('active');
-        document.getElementById('aviatorGame').classList.add('active');
-      }
+      e.target.classList.add('active');
+      document.getElementById(game + 'Game').classList.add('active');
     }
 
-    function initBoard() {
+    /* --- APPLE OF FORTUNE LOGIC --- */
+    const coeffs = ["x 349.68", "x 69.93", "x 27.97", "x 11.18", "x 6.71", "x 4.02", "x 2.41", "x 1.93", "x 1.54", "x 1.23"];
+    const board = document.getElementById('board');
+    let currentStep = 9;
+    let safeAppleCols = [];
+
+    function initAppleBoard() {
       board.innerHTML = '';
       for (let r = 0; r < 10; r++) {
         const row = document.createElement('div');
@@ -239,60 +240,89 @@
       }
     }
 
-    function generateSignal() {
-      safeCols = [];
-      for (let r = 0; r < 10; r++) {
-        safeCols.push(Math.floor(Math.random() * 5));
-      }
+    function generateAppleSignal() {
+      safeAppleCols = [];
+      for (let r = 0; r < 10; r++) safeAppleCols.push(Math.floor(Math.random() * 5));
       currentStep = 9;
-      render();
+      renderApple();
     }
 
-    function render() {
+    function renderApple() {
       for (let r = 0; r < 10; r++) {
-        const badge = document.getElementById(`badge-${r}`);
-        badge.className = 'coeff-badge' + (r === currentStep ? ' active' : '');
-
+        document.getElementById(`badge-${r}`).className = 'coeff-badge' + (r === currentStep ? ' active' : '');
         for (let c = 0; c < 5; c++) {
           const cell = document.getElementById(`cell-${r}-${c}`);
-          cell.className = 'wooden-cell';
-          cell.innerHTML = '';
-
-          if (r >= currentStep && safeCols[r] !== undefined) {
-            if (c === safeCols[r]) {
-              cell.classList.add('apple');
-              cell.innerHTML = '🍎';
-            } else if (r === currentStep) {
-              cell.classList.add('eaten');
-              cell.innerHTML = '🍄';
-            }
+          cell.className = 'wooden-cell'; cell.innerHTML = '';
+          if (r >= currentStep && safeAppleCols[r] !== undefined) {
+            if (c === safeAppleCols[r]) { cell.classList.add('apple'); cell.innerHTML = '🍎'; }
+            else if (r === currentStep) { cell.classList.add('eaten'); cell.innerHTML = '🍄'; }
           }
         }
       }
     }
 
-    function nextStep() {
-      if (safeCols.length === 0) generateSignal();
-      if (currentStep > 0) {
-        currentStep--;
-        render();
+    function nextAppleStep() { if (currentStep > 0) { currentStep--; renderApple(); } }
+    function prevAppleStep() { if (currentStep < 9) { currentStep++; renderApple(); } }
+
+    /* --- SWAMP LAND LOGIC (4x5) --- */
+    const swampBoard = document.getElementById('swampBoard');
+    function initSwampBoard() {
+      swampBoard.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        const row = document.createElement('div');
+        row.className = 'swamp-row';
+        for (let c = 0; c < 5; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'swamp-cell';
+          cell.id = `swamp-${r}-${c}`;
+          cell.innerHTML = '🪷';
+          row.appendChild(cell);
+        }
+        swampBoard.appendChild(row);
       }
     }
 
-    function prevStep() {
-      if (currentStep < 9) {
-        currentStep++;
-        render();
+    function generateSwampSignal() {
+      initSwampBoard();
+      for (let r = 0; r < 4; r++) {
+        const safeCol = Math.floor(Math.random() * 5);
+        const cell = document.getElementById(`swamp-${r}-${safeCol}`);
+        cell.classList.add('safe');
+        cell.innerHTML = '🐸';
       }
     }
 
-    function getAviatorSignal() {
-      const res = (Math.random() * 4 + 1.2).toFixed(2);
-      document.getElementById('aviatorValue').innerText = 'x' + res;
+    /* --- MINES LOGIC (5x5) --- */
+    const minesBoard = document.getElementById('minesBoard');
+    function initMinesBoard() {
+      minesBoard.innerHTML = '';
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'mine-cell';
+        cell.id = `mine-${i}`;
+        cell.innerHTML = '🔹';
+        minesBoard.appendChild(cell);
+      }
     }
 
-    initBoard();
-    generateSignal();
+    function generateMinesSignal() {
+      initMinesBoard();
+      let stars = new Set();
+      while(stars.size < 5) {
+        stars.add(Math.floor(Math.random() * 25));
+      }
+      stars.forEach(idx => {
+        const cell = document.getElementById(`mine-${idx}`);
+        cell.classList.add('star');
+        cell.innerHTML = '⭐';
+      });
+    }
+
+    // Init All Games
+    initAppleBoard();
+    generateAppleSignal();
+    initSwampBoard();
+    initMinesBoard();
   </script>
 </body>
 </html>
