@@ -3,258 +3,454 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>4vs4 Shooter Arena</title>
+  <title>MAX STAVKA VIP - BE127</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden; justify-content: center; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: linear-gradient(135deg, #090d16 0%, #05070a 100%); color: #ffffff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
     
-    .header { width: 100%; max-width: 400px; padding: 10px; display: flex; justify-content: space-between; background: #1e293b; font-size: 14px; font-weight: bold; }
-    
-    canvas { background: #1e293b; border: 2px solid #334155; border-radius: 10px; touch-action: none; }
+    /* GLASSMORPHISM CARD (iOS STYLE) */
+    .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); }
 
-    .controls { width: 100%; max-width: 400px; padding: 10px; display: flex; gap: 10px; flex-direction: column; }
-    .weapons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; }
-    .w-btn { background: #334155; border: 1px solid #475569; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-    .w-btn.active { background: #3b82f6; border-color: #60a5fa; }
+    /* USER PROFILE HEADER */
+    .user-card { width: 100%; max-width: 420px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .user-info { display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #007aff, #5856d6); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; color: #fff; box-shadow: 0 0 12px rgba(0, 122, 255, 0.5); }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-size: 15px; font-weight: 700; color: #fff; }
+    .user-status { font-size: 11px; color: #34c759; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 
-    .fire-btn { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: white; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); text-align: center; }
-    .fire-btn:active { transform: scale(0.96); }
+    /* PROMO BANNER */
+    .promo-box { background: rgba(0, 122, 255, 0.15); border: 1px dashed #007aff; border-radius: 10px; padding: 5px 10px; display: flex; align-items: center; gap: 8px; }
+    .promo-code { font-weight: 800; color: #60a5fa; font-size: 14px; letter-spacing: 0.5px; }
+    .copy-btn { background: #007aff; color: #fff; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .copy-btn:active { transform: scale(0.95); }
 
-    .status-overlay { position: absolute; background: rgba(0,0,0,0.85); width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; font-size: 20px; font-weight: bold; }
+    /* LIVE TICKER */
+    .live-ticker { width: 100%; max-width: 420px; padding: 8px 14px; font-size: 12px; color: #ffd60a; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+
+    /* MENU GRID */
+    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px; }
+    .menu-card { padding: 18px 12px; text-align: center; cursor: pointer; transition: all 0.25s ease; font-size: 15px; font-weight: 700; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+    .menu-card:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.12); }
+    .menu-card.full-width { grid-column: span 2; background: linear-gradient(135deg, rgba(0, 122, 255, 0.3), rgba(88, 86, 214, 0.3)); border-color: rgba(0, 122, 255, 0.4); }
+
+    /* SCREENS */
+    .game-screen { width: 100%; max-width: 420px; padding: 18px; display: none; flex-direction: column; align-items: center; }
+    .game-screen.active { display: flex; }
+
+    .back-btn { align-self: flex-start; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 14px; cursor: pointer; backdrop-filter: blur(8px); }
+
+    /* STATUS & CONTROLS */
+    .signal-status { width: 100%; display: flex; justify-content: space-between; font-size: 12px; color: #a1a1aa; margin-top: 12px; margin-bottom: 6px; }
+    .signal-power { color: #34c759; font-weight: bold; }
+
+    /* GENERAL BUTTON */
+    .action-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #34c759, #28a745); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(52, 199, 89, 0.35); transition: 0.2s; }
+    .action-btn:active { transform: scale(0.98); }
+
+    .nav-row { display: flex; gap: 8px; width: 100%; margin-top: 8px; }
+    .secondary-btn { flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .secondary-btn:active { background: rgba(255, 255, 255, 0.2); }
+
+    /* MINES */
+    .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin: 12px 0; }
+    .grid-cell { aspect-ratio: 1; background: rgba(255, 255, 255, 0.06); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: center; align-items: center; font-size: 22px; transition: 0.3s; }
+    .grid-cell.star { background: rgba(52, 199, 89, 0.25); border-color: #34c759; box-shadow: 0 0 12px #34c759; }
+
+    /* SWAMP LAND (4 QATOR x 5 KATAK) */
+    .swamp-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 12px 0; }
+    .swamp-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; position: relative; }
+    .swamp-cell { height: 44px; background: rgba(255, 255, 255, 0.06); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: center; align-items: center; font-size: 20px; transition: 0.3s; }
+    .swamp-cell.safe { background: rgba(0, 122, 255, 0.3); border-color: #007aff; box-shadow: 0 0 12px #007aff; }
+    .swamp-row.top-row { border: 1px dashed #ffd60a; padding: 2px; border-radius: 12px; background: rgba(255, 214, 10, 0.05); }
+    .swamp-badge { position: absolute; right: -8px; top: -8px; background: #ffd60a; color: #000; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 6px; }
+
+    /* APPLE OF FORTUNE */
+    .apple-grid { display: flex; flex-direction: column; gap: 5px; width: 100%; margin: 10px 0; }
+    .apple-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 3px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); transition: 0.3s; }
+    .apple-row.active-step { background: rgba(52, 199, 89, 0.15); border: 1px solid #34c759; }
+    .apple-cell { height: 30px; background: rgba(255, 255, 255, 0.06); border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+    .apple-cell.safe { background: rgba(52, 199, 89, 0.4); border: 1px solid #34c759; box-shadow: 0 0 8px #34c759; }
+
+    /* AVIATOR */
+    .aviator-box { width: 100%; height: 140px; background: radial-gradient(circle, rgba(255, 45, 85, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%); border-radius: 16px; border: 1px solid #ff2d55; display: flex; justify-content: center; align-items: center; font-size: 38px; font-weight: 800; color: #ff2d55; margin: 12px 0; text-shadow: 0 0 15px #ff2d55; }
+
+    /* FOOTBALL FORM */
+    .input-field { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(0, 0, 0, 0.4); color: #fff; font-size: 14px; margin: 8px 0; outline: none; text-align: center; }
+    .foot-box { width: 100%; background: rgba(255, 255, 255, 0.04); border-radius: 12px; padding: 14px; margin: 10px 0; font-size: 13px; line-height: 1.6; border: 1px solid rgba(255, 255, 255, 0.08); }
+    .foot-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 0; }
+    .foot-item:last-child { border-bottom: none; }
+
+    /* CALCULATOR */
+    .calc-box { width: 100%; background: rgba(255, 255, 255, 0.04); border-radius: 12px; padding: 14px; margin: 10px 0; font-size: 13px; }
+
+    .footer-promo { margin-top: auto; padding-top: 15px; text-align: center; font-size: 11px; color: #8e8e93; }
   </style>
 </head>
 <body>
 
-  <div id="overlay" class="status-overlay" style="display:none;">
-    <div id="statusText" style="margin-bottom:15px;">1-RAUND</div>
-    <button onclick="nextRound()" style="padding:10px 20px; background:#10b981; border:none; color:#fff; border-radius:8px; font-weight:bold;">DAVOM ETISH 🚀</button>
-  </div>
-
-  <div class="header">
-    <div style="color:#60a5fa;">SIZ (KOK): <span id="blueScore">0</span></div>
-    <div style="color:#f87171;">ROUND: <span id="roundNum">1</span>/3</div>
-    <div style="color:#f87171;">DUSHMAN (QIZIL): <span id="redScore">0</span></div>
-  </div>
-
-  <canvas id="gameCanvas" width="360" height="360"></canvas>
-
-  <div class="controls">
-    <div class="weapons">
-      <button class="w-btn active" onclick="setWeapon('AK47', this)">AK-47</button>
-      <button class="w-btn" onclick="setWeapon('M416', this)">M416</button>
-      <button class="w-btn" onclick="setWeapon('AWM', this)">AWM</button>
-      <button class="w-btn" onclick="setWeapon('UMP45', this)">UMP-45</button>
-      <button class="w-btn" onclick="setWeapon('S12K', this)">S12K</button>
+  <!-- USER HEADER -->
+  <div class="user-card glass-panel">
+    <div class="user-info">
+      <div class="user-avatar" id="uAvatar">U</div>
+      <div class="user-details">
+        <div class="user-name" id="uName">Foydalanuvchi</div>
+        <div class="user-status"><span>●</span> VIP Status (Faol)</div>
+      </div>
     </div>
-    <button class="fire-btn" id="fireBtn">OTISH 💥</button>
+    <div class="promo-box">
+      <span class="promo-code">BE127</span>
+      <button class="copy-btn" onclick="copyPromo()">COPY</button>
+    </div>
+  </div>
+
+  <!-- LIVE TICKER -->
+  <div class="live-ticker glass-panel">
+    <span>🔥 LIVE YUTUQ:</span> <span id="tickerText">User_8273 Mines'da 180 000 so'm yutib oldi!</span>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="main-menu" class="menu-grid">
+    <div class="menu-card glass-panel" onclick="openGame('apple')">🍎 Apple of Fortune (27.98x)</div>
+    <div class="menu-card glass-panel" onclick="openGame('swamp')">🐸 Swamp Land (27x)</div>
+    <div class="menu-card glass-panel" onclick="openGame('mines')">💣 Mines (5x5)</div>
+    <div class="menu-card glass-panel" onclick="openGame('aviator')">🚀 Aviator</div>
+    <div class="menu-card glass-panel full-width" onclick="openGame('football')">⚽️ Futbol Tahlil AI (Jamoalar)</div>
+    <div class="menu-card glass-panel full-width" style="background: rgba(255,255,255,0.06);" onclick="openGame('calc')">📊 Depozit Strategiya Kalkulyatori</div>
+  </div>
+
+  <!-- APPLE OF FORTUNE -->
+  <div id="screen-apple" class="game-screen glass-panel">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Apple of Fortune (27.98x)</h3>
+    <div style="font-size: 11px; color: #a1a1aa; margin-top:2px;">Bosqich: <b id="appleStepText" style="color:#34c759;">1 / 10</b></div>
+    <div class="apple-grid" id="appleGrid"></div>
+    
+    <button class="action-btn" onclick="startAppleGame()">🚀 START (Boshlash)</button>
+    <div class="nav-row">
+      <button class="secondary-btn" onclick="prevAppleStep()">⬅️ Oldingi</button>
+      <button class="secondary-btn" onclick="nextAppleStep()">Keyingi ➡️</button>
+    </div>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="applePower">98%</b></span>
+      <span>Vaqti: <b id="appleTimer">00:30</b></span>
+    </div>
+  </div>
+
+  <!-- SWAMP LAND -->
+  <div id="screen-swamp" class="game-screen glass-panel">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Swamp Land (4 Qator x 5 Katak)</h3>
+    <div class="swamp-grid" id="swampGrid"></div>
+    <button class="action-btn" onclick="generateSwamp()">SIGNAL OL (27x)</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="swampPower">96%</b></span>
+      <span>Vaqti: <b id="swampTimer">00:30</b></span>
+    </div>
+  </div>
+
+  <!-- MINES -->
+  <div id="screen-mines" class="game-screen glass-panel">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Mines (5x5)</h3>
+    <div class="mines-grid" id="minesGrid"></div>
+    <button class="action-btn" onclick="generateMines()">SIGNAL OL (5 STAR)</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="minesPower">98%</b></span>
+      <span>Vaqti: <b id="minesTimer">00:30</b></span>
+    </div>
+  </div>
+
+  <!-- AVIATOR -->
+  <div id="screen-aviator" class="game-screen glass-panel">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Aviator Predictor</h3>
+    <div class="aviator-box" id="aviatorText">1.00x</div>
+    <button class="action-btn" onclick="generateAviator()">SIGNAL OL</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="aviatorPower">95%</b></span>
+      <span>Vaqti: <b id="aviatorTimer">00:30</b></span>
+    </div>
+  </div>
+
+  <!-- FOOTBALL AI -->
+  <div id="screen-football" class="game-screen glass-panel">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Futbol O'yin Tahlili AI</h3>
+    <input type="text" id="matchInput" class="input-field" placeholder="Masalan: Real Madrid vs Barcelona">
+    <button class="action-btn" onclick="analyzeFootballMatch()">⚡️ TAHLIL QILISH</button>
+
+    <div class="foot-box" id="footBox">
+      <div style="text-align:center; color:#8e8e93;">Jamoalarni kiriting va tahlil tugmasini bosing</div>
+    </div>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div id="screen-calc" class="game-screen glass-panel">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Depozit Kalkulyatori</h3>
+    <div class="calc-box">
+      <label>Balansingizni kiriting (sum):</label>
+      <input type="number" id="depInput" class="input-field" value="45000" oninput="calculateDep()">
+      <div id="calcRes">
+        <div class="foot-item"><span>Boshlang'ich stavka (1%):</span> <b>450 sum</b></div>
+        <div class="foot-item"><span>Apple uchun tavsiya:</span> <b>500 sum</b></div>
+        <div class="foot-item"><span>Swamp uchun tavsiya:</span> <b>500 sum</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-promo">
+    Promokod: <b>BE127</b> | iOS Glass Edition v2.5
   </div>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let currentRound = 1;
-    let blueScore = 0;
-    let redScore = 0;
-    let isGameOver = false;
-
-    // QUROLLAR
-    const WEAPONS = {
-      'AK47': { damage: 35, rate: 200, speed: 8 },
-      'M416': { damage: 25, rate: 120, speed: 10 },
-      'AWM': { damage: 100, rate: 800, speed: 14 },
-      'UMP45': { damage: 20, rate: 90, speed: 9 },
-      'S12K': { damage: 60, rate: 400, speed: 7 }
-    };
-    let currentWeapon = WEAPONS['AK47'];
-
-    let players = [];
-    let bullets = [];
-
-    function initRound() {
-      bullets = [];
-      players = [];
-      
-      // KOK JAMOA (Siz + 3 bot)
-      players.push({ id: 0, x: 50, y: 180, team: 'blue', hp: 100, isUser: true });
-      for(let i=1; i<=3; i++) {
-        players.push({ id: i, x: 30, y: 50 + i*80, team: 'blue', hp: 100, isUser: false });
+    // TELEGRAM USER DATA
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.expand();
+      if (tg.initDataUnsafe?.user) {
+        const u = tg.initDataUnsafe.user;
+        document.getElementById('uName').innerText = u.first_name + (u.last_name ? " " + u.last_name : "");
+        document.getElementById('uAvatar').innerText = u.first_name.charAt(0).toUpperCase();
       }
-
-      // QIZIL JAMOA (4 bot)
-      for(let i=0; i<4; i++) {
-        players.push({ id: i+4, x: 330, y: 50 + i*80, team: 'red', hp: 100, isUser: false });
-      }
-
-      document.getElementById('overlay').style.display = 'none';
-      isGameOver = false;
     }
 
-    // YURISH (Touch dragging)
-    let isDragging = false;
-    canvas.addEventListener('touchstart', (e) => isDragging = true);
-    canvas.addEventListener('touchend', () => isDragging = false);
-    canvas.addEventListener('touchmove', (e) => {
-      if(!isDragging) return;
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.touches[0];
-      const user = players.find(p => p.isUser && p.hp > 0);
-      if(user) {
-        user.x = touch.clientX - rect.left;
-        user.y = touch.clientY - rect.top;
-      }
-    });
-
-    // OTISH
-    document.getElementById('fireBtn').addEventListener('click', () => {
-      const user = players.find(p => p.isUser && p.hp > 0);
-      if(user) shoot(user, currentWeapon);
-    });
-
-    function shoot(p, weapon) {
-      // Eng yaqin dushmanni topish
-      let enemies = players.filter(e => e.team !== p.team && e.hp > 0);
-      if(enemies.length === 0) return;
-
-      let target = enemies[0];
-      let minDist = 9999;
-      enemies.forEach(e => {
-        let d = Math.hypot(e.x - p.x, e.y - p.y);
-        if(d < minDist) { minDist = d; target = e; }
-      });
-
-      let angle = Math.atan2(target.y - p.y, target.x - p.x);
-      bullets.push({
-        x: p.x, y: p.y,
-        vx: Math.cos(angle) * weapon.speed,
-        vy: Math.sin(angle) * weapon.speed,
-        damage: weapon.damage,
-        team: p.team
-      });
+    function copyPromo() {
+      navigator.clipboard.writeText('BE127');
+      alert("Promokod BE127 nusxalandi!");
     }
 
-    function setWeapon(name, btn) {
-      currentWeapon = WEAPONS[name];
-      document.querySelectorAll('.w-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    // BOT AI (Avto-harakat va otish)
+    // LIVE TICKER
+    const wins = [
+      "User_9921 Aviator'da 3.45x ushladi!",
+      "User_1029 Mines'da 240 000 so'm yutdi!",
+      "User_5512 Apple'da 27.98x gacha yetdi! 🔥",
+      "User_8831 Swamp Land'da 27x yutuq oldi!"
+    ];
+    let winIndex = 0;
     setInterval(() => {
-      if(isGameOver) return;
-      players.forEach(p => {
-        if(!p.isUser && p.hp > 0) {
-          // Kichik tasodifiy harakat
-          p.x += (Math.random() - 0.5) * 10;
-          p.y += (Math.random() - 0.5) * 10;
+      winIndex = (winIndex + 1) % wins.length;
+      document.getElementById('tickerText').innerText = wins[winIndex];
+    }, 4000);
 
-          // Bot otishi
-          if(Math.random() < 0.4) {
-            shoot(p, WEAPONS['M416']);
-          }
-        }
-      });
-    }, 500);
-
-    // GAME LOOP
-    function update() {
-      if(isGameOver) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // O'QLARNI HISOBLASH
-      bullets.forEach((b, bIdx) => {
-        b.x += b.vx;
-        b.y += b.vy;
-
-        // Chizish
-        ctx.fillStyle = b.team === 'blue' ? '#60a5fa' : '#f87171';
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 3, 0, Math.PI*2);
-        ctx.fill();
-
-        // Tegishni tekshirish
-        players.forEach(p => {
-          if(p.hp > 0 && p.team !== b.team) {
-            let dist = Math.hypot(p.x - b.x, p.y - b.y);
-            if(dist < 12) {
-              p.hp -= b.damage;
-              bullets.splice(bIdx, 1);
-            }
-          }
-        });
-      });
-
-      // O'YINCHILARNI CHIZISH
-      let blueAlive = 0;
-      let redAlive = 0;
-
-      players.forEach(p => {
-        if(p.hp > 0) {
-          if(p.team === 'blue') blueAlive++;
-          else redAlive++;
-
-          // O'yinchi tanasi
-          ctx.fillStyle = p.team === 'blue' ? '#2563eb' : '#dc2626';
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 10, 0, Math.PI*2);
-          ctx.fill();
-
-          if(p.isUser) {
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-          }
-
-          // HP BAR
-          ctx.fillStyle = '#000';
-          ctx.fillRect(p.x - 12, p.y - 18, 24, 4);
-          ctx.fillStyle = '#10b981';
-          ctx.fillRect(p.x - 12, p.y - 18, (p.hp/100)*24, 4);
-        }
-      });
-
-      // RAUND TUGASHINI TEKSHIRISH
-      if(blueAlive === 0 || redAlive === 0) {
-        isGameOver = true;
-        if(blueAlive > 0) blueScore++;
-        else redScore++;
-
-        document.getElementById('blueScore').innerText = blueScore;
-        document.getElementById('redScore').innerText = redScore;
-
-        const overlay = document.getElementById('overlay');
-        const statusText = document.getElementById('statusText');
-
-        if(currentRound >= 3 || blueScore === 2 || redScore === 2) {
-          statusText.innerText = blueScore > redScore ? "O'YINDA YUTDINGIZ! 🎉" : "YUTQAZDINGIZ! ❌";
-        } else {
-          statusText.innerText = `${currentRound}-RAUND TUGADI!`;
-        }
-        overlay.style.display = 'flex';
-      }
-
-      requestAnimationFrame(update);
+    // NAVIGATION
+    function goMenu() {
+      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('main-menu').style.display = 'grid';
     }
 
-    function nextRound() {
-      if(currentRound >= 3 || blueScore === 2 || redScore === 2) {
-        currentRound = 1;
-        blueScore = 0;
-        redScore = 0;
-        document.getElementById('blueScore').innerText = 0;
-        document.getElementById('redScore').innerText = 0;
-      } else {
-        currentRound++;
-      }
-      document.getElementById('roundNum').innerText = currentRound;
-      initRound();
-      update();
+    function openGame(game) {
+      document.getElementById('main-menu').style.display = 'none';
+      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(`screen-${game}`).classList.add('active');
     }
 
-    initRound();
-    update();
+    function startTimer(timerId, powerId) {
+      let sec = 30;
+      document.getElementById(powerId).innerText = (Math.floor(Math.random() * 4) + 96) + "%";
+      const interval = setInterval(() => {
+        sec--;
+        document.getElementById(timerId).innerText = `00:${sec < 10 ? '0' + sec : sec}`;
+        if(sec <= 0) clearInterval(interval);
+      }, 1000);
+    }
+
+    // APPLE OF FORTUNE CONTROLS (10 ROW)
+    const appleGrid = document.getElementById('appleGrid');
+    let currentAppleStep = 0;
+    let appleData = [];
+
+    // Create 10 Rows
+    for(let r=9; r>=0; r--) {
+      const row = document.createElement('div');
+      row.className = 'apple-row';
+      row.id = `apple-row-${r}`;
+      for(let c=0; c<5; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'apple-cell';
+        cell.id = `apple-${r}-${c}`;
+        row.appendChild(cell);
+      }
+      appleGrid.appendChild(row);
+    }
+
+    function startAppleGame() {
+      appleData = [];
+      for(let r=0; r<10; r++) {
+        appleData.push(Math.floor(Math.random() * 5));
+      }
+      currentAppleStep = 0;
+      renderAppleStep();
+      startTimer('appleTimer', 'applePower');
+    }
+
+    function renderAppleStep() {
+      for(let r=0; r<10; r++) {
+        const row = document.getElementById(`apple-row-${r}`);
+        row.classList.remove('active-step');
+        for(let c=0; c<5; c++) {
+          const el = document.getElementById(`apple-${r}-${c}`);
+          el.className = 'apple-cell';
+          el.innerHTML = '';
+        }
+      }
+
+      for(let r=0; r<=currentAppleStep && r<10; r++) {
+        const safeCol = appleData[r];
+        if(safeCol !== undefined) {
+          const el = document.getElementById(`apple-${r}-${safeCol}`);
+          el.classList.add('safe');
+          el.innerHTML = '🍎';
+        }
+      }
+
+      const activeRow = document.getElementById(`apple-row-${currentAppleStep}`);
+      if(activeRow) activeRow.classList.add('active-step');
+      document.getElementById('appleStepText').innerText = `${currentAppleStep + 1} / 10`;
+    }
+
+    function nextAppleStep() {
+      if(appleData.length === 0) startAppleGame();
+      if(currentAppleStep < 9) {
+        currentAppleStep++;
+        renderAppleStep();
+      }
+    }
+
+    function prevAppleStep() {
+      if(currentAppleStep > 0) {
+        currentAppleStep--;
+        renderAppleStep();
+      }
+    }
+
+    // SWAMP LAND (4 ROW x 5 COLUMNS)
+    const swampGrid = document.getElementById('swampGrid');
+    for(let r=3; r>=0; r--) {
+      const row = document.createElement('div');
+      row.className = 'swamp-row' + (r === 3 ? ' top-row' : '');
+      if(r === 3) {
+        const badge = document.createElement('div');
+        badge.className = 'swamp-badge';
+        badge.innerText = 'MAX 27X';
+        row.appendChild(badge);
+      }
+      for(let c=0; c<5; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'swamp-cell';
+        cell.id = `swamp-${r}-${c}`;
+        row.appendChild(cell);
+      }
+      swampGrid.appendChild(row);
+    }
+
+    function generateSwamp() {
+      for(let r=0; r<4; r++) {
+        let safeCol = Math.floor(Math.random() * 5);
+        for(let c=0; c<5; c++) {
+          const el = document.getElementById(`swamp-${r}-${c}`);
+          el.className = 'swamp-cell';
+          el.innerHTML = '';
+          if(c === safeCol) {
+            el.classList.add('safe');
+            el.innerHTML = '🪷';
+          }
+        }
+      }
+      startTimer('swampTimer', 'swampPower');
+    }
+
+    // MINES
+    const minesGrid = document.getElementById('minesGrid');
+    for(let i=0; i<25; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      minesGrid.appendChild(cell);
+    }
+    function generateMines() {
+      const cells = minesGrid.children;
+      for(let c of cells) { c.className = 'grid-cell'; c.innerHTML = ''; }
+      let safe = [];
+      while(safe.length < 5) {
+        let r = Math.floor(Math.random() * 25);
+        if(!safe.includes(r)) safe.push(r);
+      }
+      safe.forEach(idx => {
+        cells[idx].classList.add('star');
+        cells[idx].innerHTML = '⭐';
+      });
+      startTimer('minesTimer', 'minesPower');
+    }
+
+    // AVIATOR
+    function generateAviator() {
+      const el = document.getElementById('aviatorText');
+      el.innerText = "...";
+      setTimeout(() => {
+        let val = (Math.random() * 4.5 + 1.2).toFixed(2);
+        el.innerText = val + "x";
+        startTimer('aviatorTimer', 'aviatorPower');
+      }, 500);
+    }
+
+    // FOOTBALL AI
+    function analyzeFootballMatch() {
+      const val = document.getElementById('matchInput').value.trim();
+      const box = document.getElementById('footBox');
+
+      if(!val) {
+        alert("Iltimos, jamoalar nomini kiriting! (masalan: Real Madrid vs Barcelona)");
+        return;
+      }
+
+      box.innerHTML = "<div style='text-align:center; color:#34c759;'>AI Tahlil qilmoqda... ⏳</div>";
+
+      setTimeout(() => {
+        const teams = val.split(/vs|-|va/i);
+        const team1 = teams[0] ? teams[0].trim() : "1-Jamoa";
+        const team2 = teams[1] ? teams[1].trim() : "2-Jamoa";
+
+        let g1Prob = Math.floor(Math.random() * 35) + 40;
+        let drawProb = Math.floor(Math.random() * 15) + 15;
+        let g2Prob = 100 - g1Prob - drawProb;
+
+        let totalOver = (Math.random() * 1.2 + 2.1).toFixed(1);
+        let winner = g1Prob > g2Prob ? team1 : team2;
+        if(Math.abs(g1Prob - g2Prob) < 5) winner = "Durang ehtimoli yuqori";
+
+        let score1 = Math.floor(Math.random() * 3) + 1;
+        let score2 = Math.floor(Math.random() * 2);
+
+        box.innerHTML = `
+          <div style="text-align:center; font-weight:bold; color:#60a5fa; margin-bottom:8px;">📊 ${team1} vs ${team2}</div>
+          <div class="foot-item"><span>Aniq hisob taxmini:</span> <b style="color:#34c759;">${score1} - ${score2}</b></div>
+          <div class="foot-item"><span>Ehtimoliy g'olib:</span> <b>${winner}</b></div>
+          <div class="foot-item"><span>G'alaba (${team1}):</span> <b>${g1Prob}%</b></div>
+          <div class="foot-item"><span>Durang:</span> <b>${drawProb}%</b></div>
+          <div class="foot-item"><span>G'alaba (${team2}):</span> <b>${g2Prob}%</b></div>
+          <div class="foot-item"><span>Total Gol (2.5):</span> <b>${totalOver > 2.5 ? 'Ko\'p (Over)' : 'Kam (Under)'}</b></div>
+          <div class="foot-item"><span>Ikkala jamoa gol uradimi:</span> <b>${Math.random() > 0.4 ? 'HA' : 'YO\'Q'}</b></div>
+        `;
+      }, 700);
+    }
+
+    // CALCULATOR
+    function calculateDep() {
+      const val = document.getElementById('depInput').value || 0;
+      const st = Math.floor(val * 0.01);
+      const safeSt = st > 500 ? st : 500;
+      document.getElementById('calcRes').innerHTML = `
+        <div class="foot-item"><span>Boshlang'ich stavka (1%):</span> <b>${st} sum</b></div>
+        <div class="foot-item"><span>Apple uchun tavsiya:</span> <b>${safeSt} sum</b></div>
+        <div class="foot-item"><span>Swamp uchun tavsiya:</span> <b>${safeSt} sum</b></div>
+      `;
+    }
+
+    // Default Init
+    startAppleGame();
+    generateSwamp();
   </script>
 </body>
 </html>
