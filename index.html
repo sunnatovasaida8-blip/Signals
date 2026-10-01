@@ -2,213 +2,362 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BE127 VIP SIGNALS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>MAX STAVKA VIP - BE127</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-    body { background: #080c14; color: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; padding: 12px; min-height: 100vh; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: #0b0e14; color: #ffffff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
+    
+    /* USER PROFILE HEADER */
+    .user-card { width: 100%; max-width: 420px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; color: #fff; }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-size: 14px; font-weight: bold; color: #f8fafc; }
+    .user-status { font-size: 11px; color: #10b981; font-weight: 600; }
+    
+    /* PROMO BANNER & COPY */
+    .promo-box { background: rgba(59, 130, 246, 0.1); border: 1px dashed #3b82f6; border-radius: 8px; padding: 4px 8px; display: flex; align-items: center; gap: 6px; }
+    .promo-code { font-weight: bold; color: #60a5fa; font-size: 13px; }
+    .copy-btn { background: #2563eb; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; }
 
-    /* Top Promo Banner */
-    .promo-banner { background: rgba(255, 170, 0, 0.12); border: 1px solid #ffaa00; border-radius: 10px; padding: 10px; font-size: 12px; line-height: 1.4; margin-bottom: 15px; width: 100%; max-width: 380px; box-shadow: 0 0 10px rgba(255, 170, 0, 0.15); }
-    .promo-banner span { color: #ffaa00; font-weight: bold; }
+    /* LIVE WINS TICKER */
+    .live-ticker { width: 100%; max-width: 420px; background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 6px 12px; font-size: 11px; color: #fbbf24; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
 
-    /* Tabs */
-    .nav-tabs { display: flex; gap: 6px; width: 100%; max-width: 380px; margin-bottom: 15px; }
-    .tab-btn { flex: 1; padding: 10px 4px; background: #131b2e; border: 1px solid #233252; color: #8a9bbd; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.3s; }
-    .tab-btn.active { background: linear-gradient(180deg, #00e676, #00a854); color: #000; border-color: #00e676; box-shadow: 0 0 12px rgba(0, 230, 118, 0.4); }
+    /* MENU GRID */
+    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 420px; margin-bottom: 15px; }
+    .menu-card { background: #1f2937; border: 1px solid #374151; border-radius: 12px; padding: 14px 10px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: bold; }
+    .menu-card:active { transform: scale(0.96); background: #374151; }
+    .menu-card.full-width { grid-column: span 2; background: linear-gradient(135deg, #1d4ed8, #2563eb); border-color: #60a5fa; }
 
-    /* Game Card */
-    .game-box { display: none; width: 100%; max-width: 380px; background: #0f172a; border-radius: 14px; padding: 15px; border: 2px solid #1e293b; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-    .game-box.active { display: block; }
+    /* SCREENS */
+    .game-screen { width: 100%; max-width: 420px; background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 16px; display: none; flex-direction: column; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .game-screen.active { display: flex; }
 
-    .game-header { background: linear-gradient(180deg, #1e3a8a, #0f172a); border: 1px solid #3b82f6; border-radius: 8px; padding: 8px; font-weight: bold; font-size: 16px; margin-bottom: 15px; letter-spacing: 1px; color: #38bdf8; text-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
+    .back-btn { align-self: flex-start; background: #374151; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; cursor: pointer; }
 
-    /* Mines 5x5 Grid */
-    .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
-    .cell { aspect-ratio: 1; background: #1b263b; border: 1px solid #2e4066; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: 0.3s; }
-    .cell.opened { background: #059669; border-color: #10b981; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 10px rgba(16, 185, 129, 0.5); transform: scale(1.02); }
+    /* SIGNAL TIMER & POWER */
+    .signal-status { width: 100%; display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 10px; margin-bottom: 5px; }
+    .signal-power { color: #10b981; font-weight: bold; }
 
-    /* Aviator Visual */
-    .aviator-display { height: 180px; background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%); border: 1px solid #312e81; border-radius: 10px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-    .aviator-plane { font-size: 50px; transition: transform 0.5s ease; filter: drop-shadow(0 0 10px #f43f5e); }
-    .aviator-coef { font-size: 28px; font-weight: bold; color: #f43f5e; margin-top: 10px; text-shadow: 0 0 10px rgba(244, 63, 94, 0.6); }
+    /* MINES */
+    .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin: 12px 0; }
+    .grid-cell { aspect-ratio: 1; background: #1f2937; border-radius: 8px; border: 1px solid #374151; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+    .grid-cell.star { background: #065f46; border-color: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    /* Apple Rows & Multipliers */
-    .apple-board { display: flex; gap: 8px; margin-bottom: 15px; }
-    .apple-rows { flex: 1; display: flex; flex-direction: column-reverse; gap: 6px; }
-    .apple-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-    .apple-mults { display: flex; flex-direction: column-reverse; gap: 6px; width: 60px; }
-    .mult-item { height: 100%; display: flex; align-items: center; justify-content: center; background: #1e293b; border: 1px solid #334155; border-radius: 6px; font-size: 11px; font-weight: bold; color: #8a9bbd; transition: 0.3s; }
-    .mult-item.active-mult { background: #15803d; color: #facc15; border-color: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
+    /* SWAMP LAND */
+    .swamp-grid { display: flex; flex-direction: column; gap: 6px; width: 100%; margin: 12px 0; }
+    .swamp-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .swamp-cell { height: 38px; background: #1f2937; border-radius: 6px; border: 1px solid #374151; display: flex; justify-content: center; align-items: center; font-size: 18px; }
+    .swamp-cell.safe { background: #0284c7; border-color: #38bdf8; box-shadow: 0 0 8px #38bdf8; }
 
-    /* Buttons Group */
-    .btn-signal { width: 100%; padding: 13px; background: linear-gradient(180deg, #00e676, #00a854); border: none; border-radius: 10px; color: #000; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,230,118,0.3); transition: 0.2s; }
-    .btn-signal:active { transform: scale(0.97); }
+    /* APPLE OF FORTUNE */
+    .apple-grid { display: flex; flex-direction: column; gap: 4px; width: 100%; margin: 10px 0; }
+    .apple-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 2px; border-radius: 6px; background: #1f2937; }
+    .apple-cell { height: 28px; background: #374151; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 13px; }
+    .apple-cell.safe { background: #15803d; color: #fff; }
 
-    .apple-controls { display: flex; flex-direction: column; gap: 8px; }
-    .step-btns { display: flex; gap: 8px; }
-    .btn-step { flex: 1; padding: 10px; background: #1e293b; border: 1px solid #3b82f6; color: #38bdf8; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-step:disabled { opacity: 0.4; border-color: #334155; color: #64748b; cursor: not-allowed; }
+    /* AVIATOR */
+    .aviator-box { width: 100%; height: 150px; background: #000; border-radius: 12px; border: 1px solid #e11d48; display: flex; justify-content: center; align-items: center; font-size: 34px; font-weight: bold; color: #f43f5e; margin: 12px 0; }
+
+    /* FOOTBALL STATS */
+    .foot-box { width: 100%; background: #1f2937; border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 13px; line-height: 1.6; }
+    .foot-item { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding: 5px 0; }
+
+    /* DEPOSIT CALCULATOR */
+    .calc-box { width: 100%; background: #1f2937; border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 12px; }
+    .calc-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #374151; background: #0b0e14; color: #fff; margin: 8px 0; font-size: 14px; text-align: center; }
+
+    /* GENERAL BUTTON */
+    .action-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+    .action-btn:active { transform: scale(0.98); }
+    .footer-promo { margin-top: auto; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
   </style>
 </head>
 <body>
 
-  <div class="promo-banner">
-    ⚠️ Signallar faqat <span>BE127</span> promokodi orqali ro'yxatdan o'tib, kamida <span>45 000 so'm</span> depozit qilingan ID raqamlarda 100% aniq ishlaydi!
+  <!-- USER HEADER -->
+  <div class="user-card">
+    <div class="user-info">
+      <div class="user-avatar" id="uAvatar">U</div>
+      <div class="user-details">
+        <div class="user-name" id="uName">Foydalanuvchi</div>
+        <div class="user-status">● VIP Status (Faol)</div>
+      </div>
+    </div>
+    <div class="promo-box">
+      <span class="promo-code">BE127</span>
+      <button class="copy-btn" onclick="copyPromo()">COPY</button>
+    </div>
   </div>
 
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="openGame('mines')">Mines 💎</button>
-    <button class="tab-btn" onclick="openGame('aviator')">Aviator ✈</button>
-    <button class="tab-btn" onclick="openGame('apple')">Apple 🍎</button>
+  <!-- LIVE TICKER -->
+  <div class="live-ticker">
+    <span>🔥 LIVE YUTUQ:</span> <span id="tickerText">User_8273 Mines'da 180 000 so'm yutib oldi!</span>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="main-menu" class="menu-grid">
+    <div class="menu-card" onclick="openGame('mines')">💣 Mines (5x5)</div>
+    <div class="menu-card" onclick="openGame('swamp')">🐸 Swamp Land</div>
+    <div class="menu-card" onclick="openGame('apple')">🍎 Apple (27.98x)</div>
+    <div class="menu-card" onclick="openGame('aviator')">🚀 Aviator</div>
+    <div class="menu-card full-width" onclick="openGame('football')">⚽️ Futbol Taxmin AI</div>
+    <div class="menu-card full-width" style="background:#374151;" onclick="openGame('calc')">📊 Depozit Strategiya Kalkulyatori</div>
   </div>
 
   <!-- MINES -->
-  <div id="mines" class="game-box active">
-    <div class="game-header">GEMS MINES (5x5)</div>
+  <div id="screen-mines" class="game-screen">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Mines (5x5)</h3>
     <div class="mines-grid" id="minesGrid"></div>
-    <button class="btn-signal" onclick="getMinesSignal()">SIGNAL OLISH 🚀</button>
+    <button class="action-btn" onclick="generateMines()">SIGNAL OL (5 STAR)</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="minesPower">98%</b></span>
+      <span>Vaqti: <b id="minesTimer">00:30</b></span>
+    </div>
   </div>
 
-  <!-- AVIATOR -->
-  <div id="aviator" class="game-box">
-    <div class="game-header" style="background: linear-gradient(180deg, #881337, #0f172a); border-color: #f43f5e; color: #fb7185;">AVIATOR PRO</div>
-    <div class="aviator-display">
-      <div class="aviator-plane" id="planeIcon">✈️️</div>
-      <div class="aviator-coef" id="coefText">x1.00</div>
+  <!-- SWAMP LAND -->
+  <div id="screen-swamp" class="game-screen">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Swamp Land (Qurbaqa)</h3>
+    <div class="swamp-grid" id="swampGrid"></div>
+    <button class="action-btn" onclick="generateSwamp()">SIGNAL OL</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="swampPower">96%</b></span>
+      <span>Vaqti: <b id="swampTimer">00:30</b></span>
     </div>
-    <button class="btn-signal" onclick="getAviatorSignal()">SIGNAL OLISH 🚀</button>
   </div>
 
   <!-- APPLE OF FORTUNE -->
-  <div id="apple" class="game-box">
-    <div class="game-header" style="background: linear-gradient(180deg, #14532d, #0f172a); border-color: #22c55e; color: #4ade80;">APPLE OF FORTUNE</div>
-    <div class="apple-board">
-      <div class="apple-rows" id="appleRows"></div>
-      <div class="apple-mults">
-        <div class="mult-item" id="m-5">6.71x</div>
-        <div class="mult-item" id="m-4">4.02x</div>
-        <div class="mult-item" id="m-3">2.41x</div>
-        <div class="mult-item" id="m-2">1.93x</div>
-        <div class="mult-item" id="m-1">1.56x</div>
-        <div class="mult-item" id="m-0">1.23x</div>
-      </div>
+  <div id="screen-apple" class="game-screen">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Apple of Fortune (Max 27.98x)</h3>
+    <div class="apple-grid" id="appleGrid"></div>
+    <button class="action-btn" onclick="generateApple()">SIGNAL OL</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="applePower">97%</b></span>
+      <span>Vaqti: <b id="appleTimer">00:30</b></span>
     </div>
+  </div>
 
-    <!-- CONTROL BUTTONS FOR APPLE -->
-    <div class="apple-controls">
-      <button class="btn-signal" onclick="startAppleGame()">START 🚀</button>
-      <div class="step-btns">
-        <button class="btn-step" id="prevBtn" onclick="stepApple(-1)" disabled>⬇️ OLDINGI</button>
-        <button class="btn-step" id="nextBtn" onclick="stepApple(1)" disabled>KEYINGI ⬆️</button>
+  <!-- AVIATOR -->
+  <div id="screen-aviator" class="game-screen">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Aviator Predictor</h3>
+    <div class="aviator-box" id="aviatorText">1.00x</div>
+    <button class="action-btn" onclick="generateAviator()">SIGNAL OL</button>
+    <div class="signal-status">
+      <span>Kuchi: <b class="signal-power" id="aviatorPower">95%</b></span>
+      <span>Vaqti: <b id="aviatorTimer">00:30</b></span>
+    </div>
+  </div>
+
+  <!-- FOOTBALL -->
+  <div id="screen-football" class="game-screen">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Futbol O'yin Tahlili</h3>
+    <div class="foot-box" id="footBox">
+      <div style="text-align:center; color:#94a3b8;">Tahlil olish uchun tugmani bosing</div>
+    </div>
+    <button class="action-btn" onclick="generateFootball()">TAHLIL QILISH</button>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div id="screen-calc" class="game-screen">
+    <button class="back-btn" onclick="goMenu()">⬅️ Menyuga qaytish</button>
+    <h3>Depozit Kalkulyatori</h3>
+    <div class="calc-box">
+      <label>Balansingizni kiriting (sum):</label>
+      <input type="number" id="depInput" class="calc-input" value="45000" oninput="calculateDep()">
+      <div id="calcRes">
+        <div class="foot-item"><span>Boshlang'ich stavka (1%):</span> <b>450 sum</b></div>
+        <div class="foot-item"><span>Mines uchun tavsiya:</span> <b>500 sum (1-qadam)</b></div>
+        <div class="foot-item"><span>Apple uchun tavsiya:</span> <b>500 sum</b></div>
       </div>
     </div>
   </div>
 
+  <div class="footer-promo">
+    Promokod: <b>BE127</b> | Min. Depozit: 45 000 sum
+  </div>
+
   <script>
-    function openGame(id) {
-      document.querySelectorAll('.game-box').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      event.target.classList.add('active');
+    // TELEGRAM USER DATA
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.expand();
+      if (tg.initDataUnsafe?.user) {
+        const u = tg.initDataUnsafe.user;
+        document.getElementById('uName').innerText = u.first_name + (u.last_name ? " " + u.last_name : "");
+        document.getElementById('uAvatar').innerText = u.first_name.charAt(0).toUpperCase();
+      }
     }
 
-    // Init Mines Grid
-    const mGrid = document.getElementById('minesGrid');
-    mGrid.innerHTML = '';
-    for(let i=0; i<25; i++) mGrid.innerHTML += `<div class="cell" id="m-${i}"></div>`;
-
-    // Init Apple Grid
-    const aRows = document.getElementById('appleRows');
-    aRows.innerHTML = '';
-    for(let r=0; r<6; r++) {
-      let rHtml = `<div class="apple-row">`;
-      for(let c=0; c<5; c++) rHtml += `<div class="cell" id="ap-${r}-${c}"></div>`;
-      rHtml += `</div>`;
-      aRows.innerHTML += rHtml;
+    function copyPromo() {
+      navigator.clipboard.writeText('BE127');
+      alert("Promokod BE127 nusxalandi!");
     }
 
-    // Mines Signal
-    function getMinesSignal() {
-      document.querySelectorAll('#minesGrid .cell').forEach(c => { c.classList.remove('opened'); c.innerHTML = ''; });
-      let arr = [];
-      while(arr.length < 4) {
+    // LIVE TICKER LOOP
+    const wins = [
+      "User_9921 Aviator'da 3.45x ushladi!",
+      "User_1029 Mines'da 240 000 so'm yutdi!",
+      "User_5512 Apple'da 27.98x gacha yetdi! 🔥",
+      "User_8831 Swamp Land'da 120 000 so'm oldi!"
+    ];
+    let winIndex = 0;
+    setInterval(() => {
+      winIndex = (winIndex + 1) % wins.length;
+      document.getElementById('tickerText').innerText = wins[winIndex];
+    }, 4000);
+
+    // NAVIGATION
+    function goMenu() {
+      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('main-menu').style.display = 'grid';
+    }
+
+    function openGame(game) {
+      document.getElementById('main-menu').style.display = 'none';
+      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(`screen-${game}`).classList.add('active');
+    }
+
+    // TIMERS
+    function startTimer(timerId, powerId) {
+      let sec = 30;
+      document.getElementById(powerId).innerText = (Math.floor(Math.random() * 5) + 95) + "%";
+      const interval = setInterval(() => {
+        sec--;
+        document.getElementById(timerId).innerText = `00:${sec < 10 ? '0' + sec : sec}`;
+        if(sec <= 0) clearInterval(interval);
+      }, 1000);
+    }
+
+    // MINES
+    const minesGrid = document.getElementById('minesGrid');
+    for(let i=0; i<25; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      minesGrid.appendChild(cell);
+    }
+    function generateMines() {
+      const cells = minesGrid.children;
+      for(let c of cells) { c.className = 'grid-cell'; c.innerHTML = ''; }
+      let safe = [];
+      while(safe.length < 5) {
         let r = Math.floor(Math.random() * 25);
-        if(!arr.includes(r)) arr.push(r);
+        if(!safe.includes(r)) safe.push(r);
       }
-      arr.forEach(i => {
-        let el = document.getElementById(`m-${i}`);
-        el.classList.add('opened');
-        el.innerHTML = '💎';
+      safe.forEach(idx => {
+        cells[idx].classList.add('star');
+        cells[idx].innerHTML = '⭐';
       });
+      startTimer('minesTimer', 'minesPower');
     }
 
-    // Aviator Signal
-    function getAviatorSignal() {
-      let plane = document.getElementById('planeIcon');
-      let coef = document.getElementById('coefText');
-      plane.style.transform = 'translate(0px, 0px) scale(1)';
-      coef.innerHTML = "Qidirilmoqda...";
-      
-      setTimeout(() => {
-        let val = (Math.random() * (5.5 - 1.3) + 1.3).toFixed(2);
-        plane.style.transform = 'translate(30px, -20px) scale(1.2)';
-        coef.innerHTML = 'x' + val;
-      }, 600);
-    }
-
-    // Apple logic with Step-by-Step
-    let currentAppleRow = -1;
-    let applePattern = [];
-
-    function startAppleGame() {
-      // Clear board
-      document.querySelectorAll('#appleRows .cell').forEach(c => { c.classList.remove('opened'); c.innerHTML = ''; });
-      document.querySelectorAll('.mult-item').forEach(m => m.classList.remove('active-mult'));
-
-      // Generate random positions for all 6 rows
-      applePattern = [];
-      for(let r=0; r<6; r++) {
-        applePattern.push(Math.floor(Math.random() * 5));
+    // SWAMP LAND
+    const swampGrid = document.getElementById('swampGrid');
+    for(let r=0; r<4; r++) {
+      const row = document.createElement('div');
+      row.className = 'swamp-row';
+      for(let c=0; c<4; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'swamp-cell';
+        cell.id = `swamp-${r}-${c}`;
+        row.appendChild(cell);
       }
-
-      currentAppleRow = 0;
-      showAppleRow(currentAppleRow);
-      
-      document.getElementById('prevBtn').disabled = true;
-      document.getElementById('nextBtn').disabled = false;
+      swampGrid.appendChild(row);
     }
-
-    function stepApple(direction) {
-      let newRow = currentAppleRow + direction;
-      if (newRow >= 0 && newRow < 6) {
-        currentAppleRow = newRow;
-        showAppleRow(currentAppleRow);
-      }
-
-      document.getElementById('prevBtn').disabled = (currentAppleRow <= 0);
-      document.getElementById('nextBtn').disabled = (currentAppleRow >= 5);
-    }
-
-    function showAppleRow(rowIdx) {
-      // Clear higher rows if going back
-      for(let r=0; r<6; r++) {
-        let mult = document.getElementById(`m-${r}`);
-        if(r <= rowIdx) {
-          mult.classList.add('active-mult');
-          let col = applePattern[r];
-          let el = document.getElementById(`ap-${r}-${col}`);
-          el.classList.add('opened');
-          el.innerHTML = '🍎';
-        } else {
-          mult.classList.remove('active-mult');
-          for(let c=0; c<5; c++) {
-            let el = document.getElementById(`ap-${r}-${c}`);
-            el.classList.remove('opened');
-            el.innerHTML = '';
+    function generateSwamp() {
+      for(let r=0; r<4; r++) {
+        let safeCol = Math.floor(Math.random() * 4);
+        for(let c=0; c<4; c++) {
+          const el = document.getElementById(`swamp-${r}-${c}`);
+          el.className = 'swamp-cell';
+          el.innerHTML = '';
+          if(c === safeCol) {
+            el.classList.add('safe');
+            el.innerHTML = '🪷';
           }
         }
       }
+      startTimer('swampTimer', 'swampPower');
+    }
+
+    // APPLE
+    const appleGrid = document.getElementById('appleGrid');
+    for(let r=9; r>=0; r--) {
+      const row = document.createElement('div');
+      row.className = 'apple-row';
+      for(let c=0; c<5; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'apple-cell';
+        cell.id = `apple-${r}-${c}`;
+        row.appendChild(cell);
+      }
+      appleGrid.appendChild(row);
+    }
+    function generateApple() {
+      for(let r=0; r<10; r++) {
+        let safeCol = Math.floor(Math.random() * 5);
+        for(let c=0; c<5; c++) {
+          const el = document.getElementById(`apple-${r}-${c}`);
+          el.className = 'apple-cell';
+          el.innerHTML = '';
+          if(c === safeCol) {
+            el.classList.add('safe');
+            el.innerHTML = '🍎';
+          }
+        }
+      }
+      startTimer('appleTimer', 'applePower');
+    }
+
+    // AVIATOR
+    function generateAviator() {
+      const el = document.getElementById('aviatorText');
+      el.innerText = "...";
+      setTimeout(() => {
+        let val = (Math.random() * 4 + 1.15).toFixed(2);
+        el.innerText = val + "x";
+        startTimer('aviatorTimer', 'aviatorPower');
+      }, 500);
+    }
+
+    // FOOTBALL
+    function generateFootball() {
+      const box = document.getElementById('footBox');
+      box.innerHTML = "<div style='text-align:center'>Analiz qilinmoqda...</div>";
+      setTimeout(() => {
+        let g1 = Math.floor(Math.random() * 35) + 40;
+        let g2 = 100 - g1 - 10;
+        let total = (Math.random() * 1.5 + 1.8).toFixed(1);
+        let ugG1 = Math.floor(Math.random() * 30) + 45;
+        let ugG2 = 100 - ugG1;
+
+        box.innerHTML = `
+          <div class="foot-item"><span>G'alaba G'1:</span> <b>${g1}%</b></div>
+          <div class="foot-item"><span>G'alaba G'2:</span> <b>${g2}%</b></div>
+          <div class="foot-item"><span>Total (Gol):</span> <b>${total} over</b></div>
+          <div class="foot-item"><span>Burchak (G'1):</span> <b>${ugG1}%</b></div>
+          <div class="foot-item"><span>Burchak (G'2):</span> <b>${ugG2}%</b></div>
+        `;
+      }, 600);
+    }
+
+    // CALCULATOR
+    function calculateDep() {
+      const val = document.getElementById('depInput').value || 0;
+      const st = Math.floor(val * 0.01);
+      document.getElementById('calcRes').innerHTML = `
+        <div class="foot-item"><span>Boshlang'ich stavka (1%):</span> <b>${st} sum</b></div>
+        <div class="foot-item"><span>Mines uchun tavsiya:</span> <b>${st > 500 ? st : 500} sum (1-qadam)</b></div>
+        <div class="foot-item"><span>Apple uchun tavsiya:</span> <b>${st > 500 ? st : 500} sum</b></div>
+      `;
     }
   </script>
 </body>
